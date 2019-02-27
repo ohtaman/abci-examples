@@ -6,5 +6,5 @@ export LD_LIBRARY_PATH=$CUDA_HOME/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 python3 -m venv venv
 source venv/bin/activate
 
-pip install -r requirements.txt
+pip install --no-cache-dir -r requirements.txt
 
