@@ -13,6 +13,8 @@ import horovod.tensorflow.keras as hvd
 # Horovod: initialize Horovod.
 hvd.init()
 
+print(hvd.rank())
+
 # Horovod: pin GPU to be used to process local rank (one GPU per process)
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
