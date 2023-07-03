@@ -103,31 +103,21 @@ def main(model_name: str, config_file: str):
 
     logger.info(f"load model: {config['model']}")
     model = transformers.AutoModelForCausalLM.from_pretrained(**config["model"], torch_dtype=torch.float16)
+    model.enable_input_require_grads()
+    model.gradient_checkpointing_enable()
+    # load_in_8bit/load_in_4bit の場合は必要. V100 では load_in_8bit/load_in_4bit 正常に動作しないのでコメントアウト
+    # model = peft.utils.prepare_model_for_kbit_training(model)
 
-    # 訓練対象の重みの指定
-    # config['finetuning']['trainables'] に設定されていない重みについては requires_grad = False として訓練対象から除外する
-    if 'trainables' in config.get('finetuning', {}):
-        trainable_params = config['finetuning']['trainables']
-        for name, param in model.named_parameters():
-            trainable = False
-            for trainable_param in trainable_params:
-                if trainable_param in name:
-                    trainable = True
-            if not trainable:
-                param.requires_grad = False
-    # 訓練対象の重みについては、訓練の安定性の観点から float32 にしておく
-    for name, param in model.named_parameters():
-        if param.requires_grad:
-            if param.dtype != torch.float32:
-                param.data = param.data.to(torch.float32)
-                print('convert to float32')
-            print(f'tune {name} with {param.numel()} params')
+    # ベースモデルからLoRAモデルを生成
+    lora_config = peft.LoraConfig(**config["lora"])
+    peft_model = peft.get_peft_model(model, peft_config=lora_config)
+    peft_model.print_trainable_parameters()
 
 
     # モデルによっては以下のエラーが出るので暫定的な対応
     # AttributeError: 'function' object has no attribute '__func__'. Did you mean: '__doc__'?
-    if not hasattr(model.forward, '__func__'):
-        model.forward.__func__ = model.__class__.forward
+    if not hasattr(peft_model.forward, '__func__'):
+        peft_model.forward.__func__ = model.__class__.forward
 
 
     # データセットの前処理. 以下の形式に変換する
@@ -140,7 +130,7 @@ def main(model_name: str, config_file: str):
     # warning が出るので、 use_cache = False としておく
     model.config.use_cache = False
     trainer = transformers.Trainer(
-        model=model,
+        model=peft_model,
         tokenizer=tokenizer,
         train_dataset=lm_dataset['train'],
         eval_dataset=lm_dataset['test'],
@@ -150,7 +140,7 @@ def main(model_name: str, config_file: str):
 
     with torch.autocast('cuda'):
         result = trainer.train()
-    model.save_pretrained(model_output_dir)
+    peft_model.save_pretrained(model_output_dir)
     logger.info('successfully finished finetuning.')
 
 

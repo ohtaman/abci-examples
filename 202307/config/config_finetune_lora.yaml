@@ -1,0 +1,51 @@
+model:
+  # model parallel training が可能なモデルについては、device_map: auto とすることで自動的にモデルを分割して複数GPUに読み込んでくれる
+  device_map: auto
+  # 8bit/4bit training may be incompatible with V100.
+  # load_in_8bit: true
+  trust_remote_code: true
+
+lora:
+  r: 1
+  lora_alpha: 1
+  target_modules:
+    - c_attn
+    # - query_key_value
+    # - dense
+    # - dense_h_to_4h
+    # - dense_4h_to_h
+  lora_dropout: 0.01
+  bias: none
+  task_type: CAUSAL_LM
+  fan_in_fan_out: false
+
+
+training:
+  per_device_train_batch_size: 8
+  gradient_accumulation_steps: 1
+  num_train_epochs: 3
+  fp16: false
+  optim: "adamw_torch"
+  learning_rate: 1.0e-3
+  logging_steps: 10
+  evaluation_strategy: "steps"
+  save_strategy: "steps"
+  eval_steps: 100
+  save_steps: 100
+  save_total_limit: 3
+
+data:
+  train_file: data/jsquad-valid-v1.1.json
+  valid_size: 0.1
+
+input_template: |-
+  タイトル: {title}
+  
+  文脈: {context}
+
+  設問: {question}
+
+  答え: {answer[text]}
+
+outputs:
+  dirname: /scratch/${USER}/models/${JOB_NAME}.${JOB_ID}
