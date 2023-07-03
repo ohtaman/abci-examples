@@ -1,0 +1,46 @@
+model:
+  # model parallel training が可能なモデルについては、device_map: auto とすることで自動的にモデルを分割して複数GPUに読み込んでくれる
+  device_map: auto
+  # 8bit/4bit training may be incompatible with V100.
+  # load_in_8bit: true
+  trust_remote_code: true
+
+finetuning:
+  trainables:
+    # ファインチューニングで訓練する層を指定する
+    # for GPT-2, cerebras/Cerebras-GPT-xx
+    - ln_f
+    # for GPT-NEOX, databricks/dolly-v2-xx, cyberagent/open-calm-xx
+    # - final_layer_norm
+    # - embed_out
+
+
+training:
+  per_device_train_batch_size: 8
+  gradient_accumulation_steps: 1
+  num_train_epochs: 3
+  fp16: false
+  optim: "adamw_torch"
+  learning_rate: 1.0e-3
+  logging_steps: 10
+  evaluation_strategy: "steps"
+  save_strategy: "steps"
+  eval_steps: 100
+  save_steps: 100
+  save_total_limit: 3
+
+data:
+  train_file: data/jsquad-valid-v1.1.json
+  valid_size: 0.1
+
+input_template: |-
+  タイトル: {title}
+  
+  文脈: {context}
+
+  設問: {question}
+
+  答え: {answer[text]}
+
+outputs:
+  dirname: /scratch/${USER}/models/${JOB_NAME}.${JOB_ID}
