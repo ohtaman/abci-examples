@@ -4,16 +4,16 @@ model:
   # 8bit/4bit training may be incompatible with V100.
   # load_in_8bit: true
   trust_remote_code: true
+  torch_dtype: torch.float16
 
 finetuning:
   trainables:
     # ファインチューニングで訓練する層を指定する
-    # for GPT-2, cerebras/Cerebras-GPT-xx
+    # for GPT-2 (includes cerebras/Cerebras-GPT-xx)
     - ln_f
-    # for GPT-NEOX, databricks/dolly-v2-xx, cyberagent/open-calm-xx
+    # for GPT-NEOX (includes databricks/dolly-v2-xx, cyberagent/open-calm-xx)
     # - final_layer_norm
     # - embed_out
-
 
 training:
   per_device_train_batch_size: 8

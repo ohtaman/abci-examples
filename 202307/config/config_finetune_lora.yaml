@@ -6,8 +6,8 @@ model:
   trust_remote_code: true
 
 lora:
-  r: 1
-  lora_alpha: 1
+  r: 2
+  lora_alpha: 2
   target_modules:
     - c_attn
     # - query_key_value
