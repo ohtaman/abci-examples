@@ -73,7 +73,7 @@ def main(config_file: str, model_name: str=None):
     # 設定ファイルの読み込み
     with open(config_file, "r") as i_:
         config = yaml.safe_load(i_)
-    
+
     # config['model'] は AutoModelForCausalLM.from_pretrained で読み込む際のパラメータ
     # モデル名を設定ファイルではなく cli の引数として持てるようにしているので、ここで config['model'] に設定
     if model_name is not None:
@@ -111,8 +111,8 @@ def main(config_file: str, model_name: str=None):
     if 'torch_dtype' in config['model']:
         config['model']['torch_dtype'] = pydoc.locate(config['model']['torch_dtype'])
     model = transformers.AutoModelForCausalLM.from_pretrained(**config["model"])
-    # model.enable_input_require_grads()
-    # model.gradient_checkpointing_enable()
+    model.enable_input_require_grads()
+    model.gradient_checkpointing_enable()
     # load_in_8bit/load_in_4bit の場合は必要. V100 では load_in_8bit/load_in_4bit 正常に動作しないのでコメントアウト
     # model = peft.utils.prepare_model_for_kbit_training(model)
 
