@@ -117,7 +117,7 @@ def main(model_name: str, config_file: str):
     # モデルによっては以下のエラーが出るので暫定的な対応
     # AttributeError: 'function' object has no attribute '__func__'. Did you mean: '__doc__'?
     if not hasattr(peft_model.forward, '__func__'):
-        peft_model.forward.__func__ = model.__class__.forward
+        peft_model.forward.__func__ = peft_model.__class__.forward
 
 
     # データセットの前処理. 以下の形式に変換する
@@ -128,7 +128,7 @@ def main(model_name: str, config_file: str):
     data_collator = transformers.DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
     training_args = transformers.TrainingArguments(**config["training"])
     # warning が出るので、 use_cache = False としておく
-    model.config.use_cache = False
+    peft_model.config.use_cache = False
     trainer = transformers.Trainer(
         model=peft_model,
         tokenizer=tokenizer,

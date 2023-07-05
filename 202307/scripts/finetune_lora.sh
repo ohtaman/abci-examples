@@ -1,7 +1,7 @@
 #!/bin/bash
 #$ -l rt_G.large=1
 #$ -j y
-#$ -N finetune
+#$ -N finetune_lora
 #$ -o logs/
 #$ -cwd
 

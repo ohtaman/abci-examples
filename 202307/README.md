@@ -32,6 +32,26 @@ git clone https://github.com/yahoojapan/JGLUE.git
 cat  \
 ```
 
+### bitsandbytes のインストール
+
+bitsandbytes を使うと、8bit/4bit に量子化することで、GPUメモリ圧縮や高速化が期待できる
+ただし、 V100 では勾配をうまく取り扱えなくなる模様で、簡単には使えない
+
+インストールしていると、 deepspeed での訓練スピードが若干（5%くらい）向上する様子
+
+pip でもインストールできるが、この辺りのライブラリは進化が早いので、githubから直接インストールする.
+もちろんxxxしても良い
+
+```bash
+git clone https://github.com/timdettmers/bitsandbytes.git
+cd bitsandbytes
+
+CUDA_VERSION=117 make cuda11x_nomatmul
+python setup.py install
+
+```
+
+
 ### 訓練
 
 #### 訓練の種類
