@@ -1,6 +1,20 @@
-## ハッカソン用のサンプルリポジトリ
+# 第1回大規模言語モデル分散学習ハッカソン
 
-### はじめての ABCI
+2023/07/06 - 2023/07/14 で開催される[第1回大規模言語モデル分散学習ハッカソン](https://abci.ai/event/2023/06/13/ja_event.html) 用のサンプルプログラムです. 以下を含みます.
+
+1. ABCIの基本的な使い方
+   - シンプルな Job スクリプト
+2. 仮想環境の構築
+3. LLMを用いた文章生成
+4. HuggingFace Transformers の Trainer を用いた訓練
+   - Full Finetuning
+   - Finetuning （最終層）
+5. PEFT を用いた訓練
+6. DeepSpeed による高速化・省メモリ化
+
+## ABCI の基本的な使い方
+
+ABCI では、
 
 [abci_firststep](./abci_firststep)
 
@@ -70,12 +84,21 @@ python setup.py install
 2. インストラクションチューンイング
 3. RLHF
 
-
-
-
 ### ファインチューニング
 
 1. フルファインチューニング
 2. 更新する層を限定したファインチューニング
 3. LoRAによるファインチューニング
 4. DeepSpeedによる並列訓練
+
+### PEFT モデルのロードとマージ
+
+## つまりポイント
+
+1. cache ディレクトリ
+   - scratch もしくは group 領域を使う
+2. load_in_8bit は勾配情報をうまく処理できない V100
+   - とはいえ、最終そうのFNとかだと関係ないはず...何かやりようがあるかも
+   - bitsandbytes を使うと若干早くなる
+3. モデルのロードを with training_args.main_process_first() で囲むと dead lock が起こっていそう
+4. まずは小さいモデルで試してみるとよさそう

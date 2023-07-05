@@ -5,6 +5,7 @@ import os
 import pathlib
 import sys
 from itertools import chain
+import pydoc
 
 import datasets
 import fire
@@ -68,14 +69,15 @@ def preprocess(
     return grouped
 
 
-def main(model_name: str, config_file: str):
+def main(config_file: str, model_name: str=None):
     # 設定ファイルの読み込み
     with open(config_file, "r") as i_:
         config = yaml.safe_load(i_)
     
     # config['model'] は AutoModelForCausalLM.from_pretrained で読み込む際のパラメータ
     # モデル名を設定ファイルではなく cli の引数として持てるようにしているので、ここで config['model'] に設定
-    config['model']['pretrained_model_name_or_path'] = model_name
+    if model_name is not None:
+        config['model']['pretrained_model_name_or_path'] = model_name
 
     # 出力先ディレクトリの設定
     output_dir = pathlib.Path(os.path.expandvars(config['outputs']['dirname']))
@@ -93,26 +95,24 @@ def main(model_name: str, config_file: str):
 
 
     # データセット, トークナイザ, モデルのロード
-    with training_args.main_process_first():
-        logger.info(f'load datasets')
-        dataset = load_dataset(**config['data'])
+    logger.info(f'load datasets')
+    dataset = load_dataset(**config['data'])
 
 
-    # with training_args.main_process_first():
-    #     logger.info(f"load tokenizer")
-    #     tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
+    logger.info(f"load tokenizer")
     tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
         logger.info(f'set pad_token to {tokenizer.pad_token}')
 
-    # with training_args.main_process_first():
-    #     logger.info(f"load model: {config['model']}")
-    #     model = transformers.AutoModelForCausalLM.from_pretrained(**config["model"], torch_dtype=torch.float16)    with training_args.main_process_first():
+
     logger.info(f"load model: {config['model']}")
-    model = transformers.AutoModelForCausalLM.from_pretrained(**config["model"], torch_dtype=torch.float16)
-    model.enable_input_require_grads()
-    model.gradient_checkpointing_enable()
+    # torch_dtypeを文字列から型に変換しておく
+    if 'torch_dtype' in config['model']:
+        config['model']['torch_dtype'] = pydoc.locate(config['model']['torch_dtype'])
+    model = transformers.AutoModelForCausalLM.from_pretrained(**config["model"])
+    # model.enable_input_require_grads()
+    # model.gradient_checkpointing_enable()
     # load_in_8bit/load_in_4bit の場合は必要. V100 では load_in_8bit/load_in_4bit 正常に動作しないのでコメントアウト
     # model = peft.utils.prepare_model_for_kbit_training(model)
 
@@ -130,9 +130,9 @@ def main(model_name: str, config_file: str):
         peft_model.forward.__func__ = peft_model.__class__.forward
 
 
-    # データセットの前処理. 以下の形式に変換する
-    # {'input_ids': [token1, token2, ...]}
     with training_args.main_process_first():
+        # データセットの前処理. 以下の形式に変換する
+        # {'input_ids': [token1, token2, ...]}
         logger.info("convert datasets with input_template")
         lm_dataset = preprocess(dataset, tokenizer, config['input_template'])
 
