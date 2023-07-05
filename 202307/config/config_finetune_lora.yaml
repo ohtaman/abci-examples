@@ -4,6 +4,7 @@ model:
   # 8bit/4bit training may be incompatible with V100.
   # load_in_8bit: true
   trust_remote_code: true
+  torch_dtype: torch.float16
 
 lora:
   r: 2

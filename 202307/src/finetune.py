@@ -68,14 +68,15 @@ def preprocess(
     return grouped
 
 
-def main(model_name: str, config_file: str):
+def main(config_file: str, model_name: str=None):
     # 設定ファイルの読み込み
     with open(config_file, "r") as i_:
         config = yaml.safe_load(i_)
     
     # config['model'] は AutoModelForCausalLM.from_pretrained で読み込む際のパラメータ
     # モデル名を設定ファイルではなく cli の引数として持てるようにしているので、ここで config['model'] に設定
-    config['model']['pretrained_model_name_or_path'] = model_name
+    if model_name is not None:
+        config['model']['pretrained_model_name_or_path'] = model_name
 
     # 出力先ディレクトリの設定
     output_dir = pathlib.Path(os.path.expandvars(config['outputs']['dirname']))
@@ -89,7 +90,7 @@ def main(model_name: str, config_file: str):
         yaml.dump(config, o_)
 
 
-    # データセット, トークナイザ, モデルのロード
+    # データセットのロード
     logger.info(f'load datasets')
     dataset = load_dataset(**config['data'])
 
@@ -102,7 +103,10 @@ def main(model_name: str, config_file: str):
 
 
     logger.info(f"load model: {config['model']}")
-    model = transformers.AutoModelForCausalLM.from_pretrained(**config["model"], torch_dtype=torch.float16)
+    # torch_dtypeを文字列から型に変換しておく
+    if 'torch_dtype' in config['model']:
+        config['model']['torch_dtype'] = pydoc.locate(config['model']['torch_dtype'])
+    model = transformers.AutoModelForCausalLM.from_pretrained(**config["model"])
 
     # 訓練対象の重みの指定
     # config['finetuning']['trainables'] に設定されていない重みについては requires_grad = False として訓練対象から除外する
@@ -127,11 +131,13 @@ def main(model_name: str, config_file: str):
     # モデルによっては以下のエラーが出るので暫定的な対応
     # AttributeError: 'function' object has no attribute '__func__'. Did you mean: '__doc__'?
     if not hasattr(model.forward, '__func__'):
+        logger.info("add peft_model.forward.__func__")
         model.forward.__func__ = model.__class__.forward
 
 
     # データセットの前処理. 以下の形式に変換する
     # {'input_ids': [token1, token2, ...]}
+    logger.info("convert datasets with input_template")
     lm_dataset = preprocess(dataset, tokenizer, config['input_template'])
     # data_collator では、訓練用にデータを加工する
     # DataCollatorForLanguageModeling では、'input_ids' を 'labels' に設定する

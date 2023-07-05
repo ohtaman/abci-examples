@@ -90,7 +90,7 @@ def main(config_file: str, model_name: str=None):
         yaml.dump(config, o_)
 
 
-    # データセット, トークナイザ, モデルのロード
+    # データセットのロード
     logger.info(f'load datasets')
     dataset = load_dataset(**config['data'])
 

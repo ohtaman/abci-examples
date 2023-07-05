@@ -94,7 +94,7 @@ def main(config_file: str, model_name: str=None):
         yaml.dump(config, o_)
 
 
-    # データセット, トークナイザ, モデルのロード
+    # データセットのロード
     logger.info(f'load datasets')
     dataset = load_dataset(**config['data'])
 
@@ -126,7 +126,7 @@ def main(config_file: str, model_name: str=None):
     # モデルによっては以下のエラーが出るので暫定的な対応
     # AttributeError: 'function' object has no attribute '__func__'. Did you mean: '__doc__'?
     if not hasattr(peft_model.forward, '__func__'):
-        logger.info("peft_model.forward.__func__ is orverrided.")
+        logger.info("add peft_model.forward.__func__")
         peft_model.forward.__func__ = peft_model.__class__.forward
 
 
