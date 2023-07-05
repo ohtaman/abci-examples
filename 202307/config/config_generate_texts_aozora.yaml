@@ -1,0 +1,22 @@
+model:
+  device_map: auto
+  trust_remote_code: true
+
+generate:
+  max_new_tokens: 256
+  temperature: 0.7
+  top_p: 0.9
+  repetition_penalty: 1.05
+
+data:
+  test_file: aozora.json
+  n_examples: 100
+
+outputs:
+  dirname: outputs
+  filename: generated_text.jsonl
+
+prompt: |-
+  タイトル: {作品名}
+  
+  {書き出し}
