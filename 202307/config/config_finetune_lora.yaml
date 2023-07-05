@@ -9,11 +9,15 @@ lora:
   r: 2
   lora_alpha: 2
   target_modules:
-    - c_attn
-    # - query_key_value
-    # - dense
-    # - dense_h_to_4h
-    # - dense_4h_to_h
+    # for GPT-2 (includes cerebras/Cerebras-GPT-xx)
+    # - c_attn
+    # for GPT-NEOX (includes databricks/dolly-v2-xx, cyberagent/open-calm-xx)
+    - query_key_value
+    - dense
+    - dense_h_to_4h
+    - dense_4h_to_h
+    # for mosicml/mpt-7b
+    # - Wqkv
   lora_dropout: 0.01
   bias: none
   task_type: CAUSAL_LM
