@@ -75,8 +75,6 @@ xxxxxxxx has registered the job 40115866 for deletion
 
 ### 仮想環境の構築と Environment Modules
 
-深層学習
-
 ABCI では Environment Modules を利用することで、ユーザーごとに必要なライブラリのみをロードできるようになっています.
 
 利用可能なモジュールは `module avail` で確認できます.
@@ -114,6 +112,8 @@ $ module list
 Currently Loaded Modulefiles:
  1) python/3.11/3.11.2   2) cuda/11.7/11.7.1   3) cudnn/8.6/8.6.0  
 ```
+
+### Python の仮想環境構築
 
 単一ノードでサンプルプログラムを実行するには、 python および cuda モジュールをロードした上で、以下の容量で仮想環境（venv）を構築します.
 この作業はインタラクティブノードで実施可能です. また、一度実施しておけばよく、ジョブごとに実行する必要はありません.
