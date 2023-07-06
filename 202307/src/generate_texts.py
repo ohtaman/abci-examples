@@ -4,6 +4,7 @@ import logging
 import os
 import pathlib
 import sys
+import pydoc
 
 import datasets
 import fire
