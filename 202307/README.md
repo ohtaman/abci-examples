@@ -235,7 +235,7 @@ prompt: |-
 #### フルファインチューニングの例
 
 ```bash
-$ qsub -g $GROUP -l h_rt=3:00:00 -v MODEL=cerebras/Cerebras-GPT-256M -v CONFIG=config/config_finetune_fullyaml scripts/finetune.sh
+$ qsub -g $GROUP -l h_rt=3:00:00 -v MODEL=cerebras/Cerebras-GPT-256M -v CONFIG=config/config_finetune_full.yaml scripts/finetune.sh
 ```
 
 #### 最終層のファインチューニングの例
