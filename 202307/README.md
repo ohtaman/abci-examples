@@ -317,6 +317,41 @@ model:
 $ qsub -g $GROUP -l h_rt=3:00:00 -v MODEL=databricks/dolly-v2-12b -v CONFIG=config/config_finetune_lora_deepspeed.yaml scripts/finetune_lora_deepspeed.sh 
 ```
 
+### DeepSpeed を用いた Multi-Node Multi GPU 学習（分散学習）の例
+
+**以下の情報は調査中の内容を含みます**
+
+正しく訓練できているか確認できていませんが、以下の方法でマルチノードでの訓練が進むことがわかったので、不確実な情報を含みますが、共有します.
+
+1. `deepspeed` のソースコード修正
+   `.venv/lib64/python3.11/site-packages/deepspeed/launcher/multinode_runner.py` の l.144 付近の `eth0` を `eno1` に書き換える. 
+   
+   書き換え後のコードは以下のようになります.
+   ```python
+           mpirun_cmd = [
+            'mpirun',
+            '-n',
+            f'{total_process_count}',
+            '-hostfile',
+            f'{self.args.hostfile}',
+            '--mca',
+            'btl',
+            '^openib',
+            '--mca',
+            'btl_tcp_if_include',
+            'eno1',
+            # 'eth0',
+        ] + split(self.args.launcher_args)
+   ```
+
+   DeepSpeed ではデフォルトで[PDSH](https://github.com/chaos/pdsh/)を用いて分散学習を行いますが、ABCIでは ssh先のノードで Python を読み込めずにエラーとなりるようです。launcher として OpenMPI を指定しますが、 OpenMPI launcher では、自動的に `--mca btl_tcp_if_include eth0` というオプションが指定されます. しかし ABCI ではイーサネットインターフェイス名が `eno1` なので、このオプションが無視され、エラーが起きてしまいます. これを回避するために上記の箇所を修正することで、 `--mca btl_tcp_if_include eno1` というオプションが指定されるようにします
+
+あとは、（最新の abci_examples を pull してもらって）以下のコードを実行します
+
+```bash
+$ qsub -g $GROUP -v MODEL=databricks/dolly-v2-12b -v CONFIG=config/config_finetune_lora_deepspeed.yaml scripts/finetune_lora_deepspeed_multinode.sh 
+```
+
 ## 最後に（つまりそうなポイント）
 
 1. cache ディレクトリ

@@ -7,6 +7,7 @@ import sys
 from itertools import chain
 import pydoc
 
+import deepspeed
 import datasets
 import fire
 import peft
@@ -46,6 +47,9 @@ def preprocess(examples, tokenizer, input_template: str, block_size: int = 512, 
 
 
 def main(config_file: str, model_name: str = None):
+    # 分散処理用の初期設定
+    deepspeed.init_distributed()
+
     # 設定ファイルの読み込み
     with open(config_file, "r") as i_:
         config = yaml.safe_load(i_)
@@ -64,10 +68,14 @@ def main(config_file: str, model_name: str = None):
 
     # 訓練関連のパラメータ
     training_args = transformers.TrainingArguments(**config["training"])
+    if training_args.should_log:
+        logger.info(training_args)
 
     # 出力先ディレクトリに、最終的な設定値を保存しておく
-    with open(output_dir.joinpath("config.yaml"), "w") as o_:
-        yaml.dump(config, o_)
+    # ファイルに保存するのはメインプロセスのみ
+    if training_args.should_log:
+        with open(output_dir.joinpath("config.yaml"), "w") as o_:
+            yaml.dump(config, o_)
 
     # データセットのロード
     logger.info(f"load datasets")
@@ -83,6 +91,7 @@ def main(config_file: str, model_name: str = None):
     # torch_dtypeを文字列から型に変換しておく
     if "torch_dtype" in config["model"]:
         config["model"]["torch_dtype"] = pydoc.locate(config["model"]["torch_dtype"])
+
     model = transformers.AutoModelForCausalLM.from_pretrained(**config["model"])
     model.enable_input_require_grads()
     model.gradient_checkpointing_enable()
@@ -123,7 +132,9 @@ def main(config_file: str, model_name: str = None):
 
     with torch.autocast("cuda"):
         result = trainer.train()
-    peft_model.save_pretrained(model_output_dir)
+
+    if training_args.should_log:
+        peft_model.save_pretrained(model_output_dir)
     logger.info("successfully finished finetuning.")
 
 

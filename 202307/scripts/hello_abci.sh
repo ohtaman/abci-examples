@@ -5,4 +5,4 @@
 #$ -o logs/
 #$ -cwd
 
-echo "This is {$USER}'s first job on ABCI!"
+echo "This is ${USER}'s first job on ABCI!"
