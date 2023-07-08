@@ -3,8 +3,8 @@ import transformers
 
 
 def main(model_name: str):
-    config = transformers.AutoConfig.from_pretrained(model_name)
-    model = transformers.AutoModelForCausalLM.from_config(config)
+    config = transformers.AutoConfig.from_pretrained(model_name, trust_remote_code=True)
+    model = transformers.AutoModelForCausalLM.from_config(config, trust_remote_code=True)
 
     print("-- MODEL --")
     print(model)
