@@ -262,7 +262,7 @@ peft_model = get_peft_model(model)
 ... # do train
 
 # 訓練結果がベースモデル（model）に反映される
-peft_model.merge_and_anload()
+peft_model.merge_and_unload()
 model.save_pretrained(<save path>)
 
 ```
