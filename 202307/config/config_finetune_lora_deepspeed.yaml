@@ -8,7 +8,7 @@ model:
   torch_dtype: torch.float16
 
 lora:
-  r: 2
+  r: 4
   lora_alpha: 2
   target_modules:
     # for GPT-2 (includes cerebras/Cerebras-GPT-xx)
@@ -23,6 +23,8 @@ lora:
   lora_dropout: 0.01
   bias: none
   task_type: CAUSAL_LM
+  # set true for GPT-2
+  # fan_in_fan_out: true
   fan_in_fan_out: false
 
 training:
@@ -35,15 +37,14 @@ training:
   logging_steps: 10
   evaluation_strategy: "steps"
   save_strategy: "steps"
-  eval_steps: 100
+  eval_steps: 500
   save_steps: 100
   save_total_limit: 3
   deepspeed: ds_config/ds_config_zero3.json
   # for mosicml/mpt-7b
-  # deepspeed: ds_config/ds_config_zero3_mpt.json
+  # deepspeed: ds_config/ds_config_zero3_mpt3.json
 
 data:
-  # train_file: data/jsquad-train-v1.1.json
   train_file: data/jsquad-valid-v1.1.json
   valid_size: 0.1
 
@@ -57,4 +58,5 @@ input_template: |-
   答え: {answer[text]}
 
 outputs:
-  dirname: /scratch/${USER}/models/${JOB_NAME}.${JOB_ID}
+  dirname: /scratch/${USER}/models/${JOB_ID}
+ 

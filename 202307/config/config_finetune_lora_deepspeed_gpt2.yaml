@@ -1,13 +1,14 @@
 model:
   # model parallel training が可能なモデルについては、device_map: auto とすることで自動的にモデルを分割して複数GPUに読み込んでくれる
-  device_map: auto
+  # deepspeed を用いる場合は、重みの配置を deepspeed に任せるので auto は設定しない
+  # device_map: auto
   # 8bit/4bit training may be incompatible with V100.
   # load_in_8bit: true
   trust_remote_code: true
   torch_dtype: torch.float16
 
 lora:
-  r: 2
+  r: 8
   lora_alpha: 2
   target_modules:
     # for GPT-2 (includes cerebras/Cerebras-GPT-xx)
@@ -22,11 +23,10 @@ lora:
   lora_dropout: 0.01
   bias: none
   task_type: CAUSAL_LM
-  fan_in_fan_out: false
-
+  fan_in_fan_out: true
 
 training:
-  per_device_train_batch_size: 8
+  per_device_train_batch_size: 2
   gradient_accumulation_steps: 1
   num_train_epochs: 3
   fp16: false
@@ -38,8 +38,12 @@ training:
   eval_steps: 100
   save_steps: 100
   save_total_limit: 3
+  # deepspeed: ds_config/ds_config_zero3.json
+  # for mosicml/mpt-7b
+  deepspeed: ds_config/ds_config_zero3.json
 
 data:
+  # train_file: data/jsquad-train-v1.1.json
   train_file: data/jsquad-valid-v1.1.json
   valid_size: 0.1
 
@@ -53,4 +57,5 @@ input_template: |-
   答え: {answer[text]}
 
 outputs:
-  dirname: /scratch/${USER}/models/${JOB_ID}
+  dirname: /scratch/${USER}/models/${JOB_NAME}.${JOB_ID}
+  # dirname: /scratch/${USER}/models

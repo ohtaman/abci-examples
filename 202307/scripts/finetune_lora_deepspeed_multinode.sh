@@ -1,6 +1,6 @@
 #!/bin/bash
 #$ -l rt_F=4
-#$ -l h_rt=6:00:00
+#$ -l h_rt=4:00:00
 #$ -l USE_SSH=1
 #$ -j y
 #$ -N finetune_lora_deepspeed_multinode
@@ -24,6 +24,7 @@ MASTER_ADDR=$HOSNAME deepspeed \
   --hostfile $hostfile \
   --no_ssh_check \
   --launcher OpenMPI \
+  --launcher_args "-mca coll ^hcoll" \
   src/finetune_lora_distribute.py \
   --model_name $MODEL \
   --config_file $CONFIG

@@ -34,4 +34,4 @@ input_template: |-
   答え: {answer[text]}
 
 outputs:
-  dirname: /scratch/${USER}/models/${JOB_NAME}.${JOB_ID}
+  dirname: /scratch/${USER}/models/${JOB_ID}
