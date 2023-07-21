@@ -132,7 +132,7 @@ $ pip install -r requirements.txt
 bitsandbytes は言語モデルを 8bit/4bit に量子化し、GPUメモリ圧縮・高速化するライブラリです.
 V100 では勾配をうまく取り扱えなくいことがあるようですが、推論では利用可能であり、また DeepSpeed を利用した際に若干高速化されるようです.
 
-pip でもインストール可能ですが、更新が早いので GitHubから直接インストールすることをお勧めします. こちらもインタラクティブノードで実行可能です（仮想環境ん入った状態で実行します）.
+pip でもインストール可能ですが、更新が早いので GitHubから直接インストールすることをお勧めします. こちらもインタラクティブノードで実行可能です（仮想環境に入った状態で実行します）.
 
 ```bash
 git clone https://github.com/timdettmers/bitsandbytes.git
@@ -145,7 +145,7 @@ python setup.py install
 
 ### データセットの準備
 
-データセットは原則ご自身で用意されたものをご利用いただく想定ですが、先日 Yahoo! JAPAN の後悔した日本語言語理解ベンチマーク [JGLUE](https://techblog.yahoo.co.jp/entry/2022122030379907/) に含まれる質問応答データセット JSQuAD をサンプルファイル用に加工するスクリプトを用意しました.
+データセットは原則ご自身で用意されたものをご利用いただく想定ですが、先日 Yahoo! JAPAN の公開した日本語言語理解ベンチマーク [JGLUE](https://techblog.yahoo.co.jp/entry/2022122030379907/) に含まれる質問応答データセット JSQuAD をサンプルファイル用に加工するスクリプトを用意しました.
 必要があればこちらをご利用ください. 以下の手順でサンプルプログラム用に整形できます.
 
 
@@ -235,7 +235,7 @@ prompt: |-
 #### フルファインチューニングの例
 
 ```bash
-$ qsub -g $GROUP -l h_rt=3:00:00 -v MODEL=cerebras/Cerebras-GPT-256M -v CONFIG=config/config_finetune_fullyaml scripts/finetune.sh
+$ qsub -g $GROUP -l h_rt=3:00:00 -v MODEL=cerebras/Cerebras-GPT-256M -v CONFIG=config/config_finetune_full.yaml scripts/finetune.sh
 ```
 
 #### 最終層のファインチューニングの例
@@ -262,7 +262,7 @@ peft_model = get_peft_model(model)
 ... # do train
 
 # 訓練結果がベースモデル（model）に反映される
-peft_model.merge_and_anload()
+peft_model.merge_and_unload()
 model.save_pretrained(<save path>)
 
 ```
@@ -347,10 +347,13 @@ $ qsub -g $GROUP -l h_rt=3:00:00 -v MODEL=databricks/dolly-v2-12b -v CONFIG=conf
    DeepSpeed ではデフォルトで[PDSH](https://github.com/chaos/pdsh/)を用いて分散学習を行いますが、ABCIでは ssh先のノードで Python を読み込めずにエラーとなりるようです。launcher として OpenMPI を指定しますが、 OpenMPI launcher では、自動的に `--mca btl_tcp_if_include eth0` というオプションが指定されます. しかし ABCI ではイーサネットインターフェイス名が `eno1` なので、このオプションが無視され、エラーが起きてしまいます. これを回避するために上記の箇所を修正することで、 `--mca btl_tcp_if_include eno1` というオプションが指定されるようにします
 
 あとは、（最新の abci_examples を pull してもらって）以下のコードを実行します
+- [こちらのコミット](https://github.com/ohtaman/abci-examples/commit/50f31d93bf15f2bca0490e1238e810141b3c7983#diff-07488714d19467e6158f106ad5ce2af2cbdc7c4dbbf61c471042b33d43040c48R51)で、 `src/finetune_lora_distribute.py` を修正しているので、`git pull` で最新版にアップデートしてください
 
 ```bash
 $ qsub -g $GROUP -v MODEL=databricks/dolly-v2-12b -v CONFIG=config/config_finetune_lora_deepspeed.yaml scripts/finetune_lora_deepspeed_multinode.sh 
 ```
+
+- falcon-40b を訓練させる場合は、 `scripts/finetune_lora_deepspeed_multinode.sh ` で、ノード数を 4 から 8 に変更してください（OOM 回避のため）.
 
 ## 最後に（つまりそうなポイント）
 
