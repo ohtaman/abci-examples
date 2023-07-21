@@ -8,6 +8,7 @@ from itertools import chain
 import pydoc
 
 import deepspeed
+from deepspeed.utils.zero_to_fp32 import get_fp32_state_dict_from_zero_checkpoint
 import datasets
 import fire
 import peft
@@ -47,6 +48,7 @@ def preprocess(examples, tokenizer, input_template: str, block_size: int = 512, 
 
 
 def main(config_file: str, model_name: str = None):
+    logger.info(f'job_name: ${os.environ["JOB_NAME"]}')
     # 分散処理用の初期設定
     deepspeed.init_distributed()
 
@@ -61,6 +63,7 @@ def main(config_file: str, model_name: str = None):
 
     # 出力先ディレクトリの設定
     output_dir = pathlib.Path(os.path.expandvars(config["outputs"]["dirname"]))
+    logger.info(f'output_dir: {output_dir}')
     output_dir.mkdir(parents=True, exist_ok=True)
     # 出力先ディレクトリの中に、モデル名のディレクトリを作成し、訓練結果の保存先とする
     model_output_dir = output_dir.joinpath(model_name)
@@ -127,14 +130,31 @@ def main(config_file: str, model_name: str = None):
         train_dataset=lm_dataset["train"],
         eval_dataset=lm_dataset["test"],
         args=training_args,
-        data_collator=data_collator,
+        data_collator=data_collator
     )
 
     with torch.autocast("cuda"):
-        result = trainer.train()
+        if list(model_output_dir.glob("checkpoint-*")):
+            resume_from_checkpoint = True
+        else:
+            resume_from_checkpoint = False
+        result = trainer.train(resume_from_checkpoint=resume_from_checkpoint)
 
-    if training_args.should_log:
-        peft_model.save_pretrained(model_output_dir)
+    # trainer.save_model(model_output_dir)
+    # trainer.save_state()
+
+    # save peft model ralated files.
+    # this can not save the states when zero3 enabled.
+    peft_model.save_pretrained(model_output_dir)
+
+    # logger.info(f'saving latest checkpoint')
+    zero3_checkpoint_dir = model_output_dir.joinpath("zero3")
+    trainer.model_wrapped.save_checkpoint(zero3_checkpoint_dir)
+    state_dict = get_fp32_state_dict_from_zero_checkpoint(zero3_checkpoint_dir) # already on cpu
+    if training_args.should_save:
+        peft_state_dict = peft.get_peft_model_state_dict(peft_model, state_dict=state_dict)
+        torch.save(peft_state_dict, model_output_dir.joinpath("adapter_model.bin"))
+
     logger.info("successfully finished finetuning.")
 
 
