@@ -10,12 +10,12 @@ finetuning:
   trainables:
     # ファインチューニングで訓練する層を指定する
     # for cerebras/Cerebras-GPT-xx / databricks/dolly-v2-xx,
-    # - ln_f
+    - ln_f
     # for mosaicml/mpt-7b
     # norm_f
     # for rinna/japanese-gpt-neox-3.6b, cyberagent/open-calm-7b
-    - final_layer_norm
-    - embed_out
+    # - final_layer_norm
+    # - embed_out
 
 training:
   per_device_train_batch_size: 8

@@ -240,11 +240,15 @@ $ qsub -g $GROUP -l h_rt=3:00:00 -v MODEL=cerebras/Cerebras-GPT-256M -v CONFIG=c
 
 #### 最終層のファインチューニングの例
 
+訓練の対象となる層は設定ファイル（以下の例では `config/config_finetune.yaml`）で指定しており、モデル毎に異なる点に注意してください
+
 ```bash
 $ qsub -g $GROUP -l h_rt=3:00:00 -v MODEL=cerebras/Cerebras-GPT-256M -v CONFIG=config/config_finetune.yaml scripts/finetune.sh
 ```
 
 ### LoRA の例
+
+訓練の対象となる層は設定ファイル（以下の例では `config/config_finetune.yaml`）で指定しており、モデル毎に異なる点に注意してください
 
 ```bash
 $ qsub -g $GROUP -l h_rt=3:00:00 -v MODEL=cerebras/Cerebras-GPT-256M -v CONFIG=config/config_finetune_lora.yaml scripts/finetune_lora.sh
@@ -311,17 +315,21 @@ model:
 
 ![deepspeed](https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/parallelism-zero.png)
 
-### DeepSpeed を用いた Multi GPU 学習の例
+### DeepSpeed を用いた Multi GPU 訓練の例
 
 ```bash
 $ qsub -g $GROUP -l h_rt=3:00:00 -v MODEL=databricks/dolly-v2-12b -v CONFIG=config/config_finetune_lora_deepspeed.yaml scripts/finetune_lora_deepspeed.sh 
 ```
 
-### DeepSpeed を用いた Multi-Node Multi GPU 学習（分散学習）の例
+### DeepSpeed を用いた Multi-Node Multi GPU 訓練（分散訓練）の例
 
-**以下の情報は調査中の内容を含みます**
+ABCI で DeepSpeed を用いて Multi-Node Multi GPU 訓練を行うには、以下の2種類の方法がありますが、ここでは 1. の OpenMPI runner を用いる方法を紹介します
 
-正しく訓練できているか確認できていませんが、以下の方法でマルチノードでの訓練が進むことがわかったので、不確実な情報を含みますが、共有します.
+1. OpenMPI runner を用いる方法
+2. PDSH runner を用いる方法
+
+
+#### OpenMPI runner を用いる方法
 
 1. `deepspeed` のソースコード修正
    `.venv/lib64/python3.11/site-packages/deepspeed/launcher/multinode_runner.py` の l.144 付近の `eth0` を `eno1` に書き換える. 
@@ -346,14 +354,13 @@ $ qsub -g $GROUP -l h_rt=3:00:00 -v MODEL=databricks/dolly-v2-12b -v CONFIG=conf
 
    DeepSpeed ではデフォルトで[PDSH](https://github.com/chaos/pdsh/)を用いて分散学習を行いますが、ABCIでは ssh先のノードで Python を読み込めずにエラーとなりるようです。launcher として OpenMPI を指定しますが、 OpenMPI launcher では、自動的に `--mca btl_tcp_if_include eth0` というオプションが指定されます. しかし ABCI ではイーサネットインターフェイス名が `eno1` なので、このオプションが無視され、エラーが起きてしまいます. これを回避するために上記の箇所を修正することで、 `--mca btl_tcp_if_include eno1` というオプションが指定されるようにします
 
-あとは、（最新の abci_examples を pull してもらって）以下のコードを実行します
-- [こちらのコミット](https://github.com/ohtaman/abci-examples/commit/50f31d93bf15f2bca0490e1238e810141b3c7983#diff-07488714d19467e6158f106ad5ce2af2cbdc7c4dbbf61c471042b33d43040c48R51)で、 `src/finetune_lora_distribute.py` を修正しているので、`git pull` で最新版にアップデートしてください
+2. 訓練の実施
+
+falcon-40b のように大きなモデルを訓練する場合は、OOM回避のため、`scripts/finetune_lora_deepspeed_multinode.sh ` で指定しているノード数を 4 から 8 に変更してください。
 
 ```bash
 $ qsub -g $GROUP -v MODEL=databricks/dolly-v2-12b -v CONFIG=config/config_finetune_lora_deepspeed.yaml scripts/finetune_lora_deepspeed_multinode.sh 
 ```
-
-- falcon-40b を訓練させる場合は、 `scripts/finetune_lora_deepspeed_multinode.sh ` で、ノード数を 4 から 8 に変更してください（OOM 回避のため）.
 
 ## 最後に（つまりそうなポイント）
 
