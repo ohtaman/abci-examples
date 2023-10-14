@@ -141,6 +141,7 @@ cd bitsandbytes
 CUDA_VERSION=117 make cuda11x_nomatmul
 python setup.py install
 
+cd ..
 ```
 
 ### データセットの準備
