@@ -12,6 +12,8 @@ def main(input_file, output_file):
         title = data['title']
         for paragraph in data['paragraphs']:
             context = paragraph['context']
+            idx = context.find('[SEP]') + len('[SEP]')
+            context = context[idx:]
             for qa in paragraph['qas']:
                 question = qa['question']
                 answer = qa['answers'][0]
