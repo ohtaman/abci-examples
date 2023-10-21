@@ -102,7 +102,7 @@ aws-cli/2.11  s3fs-fuse/1.91  singularitypro/3.9
 ロードしたいモジュールが見つかったら、 `module load <module name>` でロードします.
 
 ```bash
-module load python/3.11 cuda/11.7 cudnn/8.6
+module load python/3.11 cuda/11.7 cudnn/8.6 hpcx/2.12
 ```
 
 ロードしたモジュールは `module list` で確認できます.
@@ -110,7 +110,7 @@ module load python/3.11 cuda/11.7 cudnn/8.6
 ```bash
 $ module list
 Currently Loaded Modulefiles:
- 1) python/3.11/3.11.2   2) cuda/11.7/11.7.1   3) cudnn/8.6/8.6.0  
+ 1) python/3.11/3.11.2   2) cuda/11.7/11.7.1   3) cudnn/8.6/8.6.0  4) hpcx/2.12
 ```
 
 ### Python の仮想環境構築
