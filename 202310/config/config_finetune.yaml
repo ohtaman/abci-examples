@@ -1,0 +1,49 @@
+model:
+  # device_map: auto とすることで自動的にモデルを分割して複数GPUに読み込んでくれる
+  device_map: auto
+  trust_remote_code: true
+  torch_dtype: torch.float16
+
+training:
+  per_device_train_batch_size: 2
+  gradient_accumulation_steps: 1
+  num_train_epochs: 1
+  fp16: false
+  optim: "adamw_torch"
+  learning_rate: 1.0e-4
+  logging_steps: 10
+  evaluation_strategy: "steps"
+  save_strategy: "steps"
+  eval_steps: 100
+  save_steps: 100
+  save_total_limit: 3
+  auto_find_batch_size: true
+
+# 全層を対象とする場合はコメントアウトする
+finetuning:
+  trainables:
+    # ファインチューニングで訓練する層を指定する
+    # for GPT-2, cerebras/Cerebras-GPT-xx / databricks/dolly-v2-xx,
+    - ln_f
+    - c_attn
+    - c_proj
+    - c_fc
+
+# early stopping をしない場合はコメントアウトする
+early_stopping_callback:
+  early_stopping_patience: 5
+
+dataset:
+  path: kunishou/databricks-dolly-15k-ja
+
+prompt_template: |-
+  ### Instruction:
+  {instruction}
+  ### Input:
+  {input}
+  ### Response:
+  {output}
+
+# モデルの出力先
+outputs:
+  dirname: /scratch/${USER}/models/${JOB_ID}
