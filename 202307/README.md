@@ -121,7 +121,7 @@ Currently Loaded Modulefiles:
 ```bash
 $ git clone https://github.com/ohtaman/abci-examples.git
 $ cd abci-examples/202307
-$ module load python/3.11 cuda/11.7 cudnn/8.6
+$ module load python/3.11 cuda/11.7 cudnn/8.6 hpcx/2.12
 $ python3 -mvenv .venv
 $ source .venv/bin/activate
 $ pip install -r requirements.txt
