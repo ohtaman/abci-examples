@@ -16,7 +16,6 @@ lora:
     # - dense_h_to_4h
     # - dense_4h_to_h
     # for GPT-2
-    - ln_f
     - c_attn
     - c_proj
     - c_fc

@@ -24,7 +24,6 @@ finetuning:
   trainables:
     # ファインチューニングで訓練する層を指定する
     # for GPT-2, cerebras/Cerebras-GPT-xx / databricks/dolly-v2-xx,
-    - ln_f
     - c_attn
     - c_proj
     - c_fc
