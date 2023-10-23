@@ -141,6 +141,12 @@ argon2-cffi-bindings==21.2.0
 ...
 ```
 
+> [!NOTE]
+> サンプルコードの修正なしに、Weights & Biases を使って訓練の経過を可視化することもできます.
+> それには、 `wandb` パッケージのインストールと初期設定（ログイン）が必要となります.
+> https://docs.wandb.ai/ja/quickstart
+
+
 ### bitsandbytes のインストール
 
 bitsandbytes は言語モデルを 8bit/4bit に量子化し、GPUメモリ圧縮・高速化するライブラリです.
