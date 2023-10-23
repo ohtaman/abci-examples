@@ -400,7 +400,7 @@ if __name__ == '__main__':
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_NAME)
     # モデルの読み込み
     base_model = AutoModelForCausalLM.from_pretrained(BASE_MODEL_NAME, trust_remote_code=True)
-    model = peft.PeftModel.from_pretrained(model, MODEL_NAME)
+    model = peft.PeftModel.from_pretrained(base_model, MODEL_NAME)
     # 文章生成
     print(generate_text(model, tokenizer, "日本で一番高い山は"))
 ```
