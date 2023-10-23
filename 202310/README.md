@@ -492,7 +492,7 @@ ABCI で DeepSpeed を用いて Multi-Node Multi GPU 訓練を行うには、Ope
 `scripts/finetune_lora_deepspeed_multinode.sh ` で指定しているノード数を変更することで、並列実行する計算ノードの台数を変更できます. 4台と8台など、台数を変えた時に訓練時間がどう変化するか、確認してみてしてください.
 
 ```bash
-$ qsub -g $GROUP -v MODEL=databricks/dolly-v2-12b -v CONFIG=config/config_finetune_lora_deepspeed.yaml scripts/finetune_lora_deepspeed_multinode.sh 
+$ qsub -g $GROUP -v MODEL=cyberagent/open-calm-7b -v CONFIG=config/config_finetune_lora_deepspeed.yaml scripts/finetune_lora_deepspeed_multinode.sh 
 ```
 
 ## 最後に（つまりそうなポイント）
