@@ -171,8 +171,8 @@ $ cd ..
 |モデル名|URL|備考|
 |:--:|:--|:--|
 | cyberagent/open-calm-7b |  https://huggingface.co/cyberagent/open-calm-7b |
-| elyza/ELYZA-japanese-Llama-2-7b | https://huggingface.co/elyza/ELYZA-japanese-Llama-2-7b |
 | cerebras/Cerebras-GPT-256M | https://huggingface.co/cerebras/Cerebras-GPT-256M |
+| elyza/ELYZA-japanese-Llama-2-7b | https://huggingface.co/elyza/ELYZA-japanese-Llama-2-7b |
 
 
 HuggingFace に登録されているモデルで文章生成を行うには、`pipeline` を使う方法と、より細かい調整のできる `model.generate` メソッドを使う方法がありますが、ここでは `model.generate` メソッドを用います.
@@ -276,7 +276,7 @@ Loading checkpoint shards: 100%|██████████| 2/2 [00:12<00:00
 
 1. フルファインチューニング
    - 言語モデルのパラメータを全て訓練対象とします
-2. は指定した層のファインチューニング
+2. 指定した層のファインチューニング
    - 訓練対象としたい層以外のパラメータを `requires_grad` を `False` とすることで、訓練対象からはずします
    - 訓練対象のパラメータが減るので、省メモリで訓練可能となります
    - 最終層をすげかえたモデルを構築し、すげかえた層のみを訓練することで、分類問題など事前訓練とは別のタスクに利用することも可能です
