@@ -233,7 +233,7 @@ $ qsub -g $GROUP scripts/generate_text.sh
 ```
 
 <details>
-<summary>src/generate_text.py</summary>
+<summary>scripts/generate_text.sh</summary>
 
 ```bash#!/bin/bash
 #$ -l rt_G.large=1
