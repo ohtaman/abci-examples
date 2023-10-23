@@ -411,6 +411,16 @@ if __name__ == '__main__':
 $ qsub -g $GROUP scripts/generate_text_lora.sh
 ```
 
+今回は [`kunishou/databricks-dolly-15k-ja`](https://huggingface.co/datasets/kunishou/databricks-dolly-15k-ja) を使って訓練したので、それに近い入力（「富士山...」ではなく、例えば以下のような入力）を入れた時の挙動を確認するとよいです
+
+```
+### Instruction:
+Cryptocurrency(暗号通貨)とは?
+### Input:
+暗号通貨、暗号通貨、または暗号は、政府や銀行などの中央当局に支持や維持を依存しないコンピュータネットワークを通じて交換媒体として機能するように設計されたデジタル通貨です[2]。取引の当事者が持っていると主張するお金を持っていることを検証する分散型システムであり、2つのエンティティ間で資金移動する際に銀行などの従来の仲介者を不要にします[3]。
+### Response:
+```
+
 ## 分散処理
 
 複数のGPUを活用するには、分散処理についての知識が必要です.
