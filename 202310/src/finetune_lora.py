@@ -72,9 +72,7 @@ def main(config_file: str, model_name: str = None):
     dataset = datasets.load_dataset(**config["dataset"])
 
     logger.info(f"load tokenizer")
-    tokenizer = transformers.AutoTokenizer.from_pretrained(
-        model_name, add_eos_token=True
-    )
+    tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
         logger.info(f"set pad_token to {tokenizer.pad_token}")

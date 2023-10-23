@@ -35,8 +35,8 @@ training:
   logging_steps: 10
   evaluation_strategy: "steps"
   save_strategy: "steps"
-  eval_steps: 50
-  save_steps: 50
+  eval_steps: 10
+  save_steps: 10
   save_total_limit: 3
   deepspeed: ds_config/ds_config_zero3.json
 

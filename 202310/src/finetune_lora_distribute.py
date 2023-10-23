@@ -40,8 +40,7 @@ def preprocess(
     examples, tokenizer, prompt_template: str, block_size: int = 1024, num_proc: int = 4
 ):
     prompts = examples.map(
-        lambda x: {"text": prompt_template.format_map(x)}
-        # lambda x: {"text": prompt_template.format_map(x) + tokenizer.eos_token}
+        lambda x: {"text": prompt_template.format_map(x) + tokenizer.eos_token}
     )
     tokenized = prompts.map(
         lambda x: tokenizer(
@@ -92,10 +91,7 @@ def main(config_file: str, model_name: str = None, local_rank: int = None):
 
     # トークナイザのロード
     logger.info(f"load tokenizer")
-    # tokenizer = transformers.AutoTokenizer.from_pretrained(model_name, padding=True, padding_side='left')
-    tokenizer = transformers.AutoTokenizer.from_pretrained(
-        model_name, add_eos_token=True
-    )
+    tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
         logger.info(f"set pad_token to {tokenizer.pad_token}")

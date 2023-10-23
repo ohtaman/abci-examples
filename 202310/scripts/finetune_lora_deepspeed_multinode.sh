@@ -1,5 +1,5 @@
 #!/bin/bash
-#$ -l rt_F=8
+#$ -l rt_F=4
 #$ -l h_rt=4:00:00
 #$ -l USE_SSH=1
 #$ -j y
