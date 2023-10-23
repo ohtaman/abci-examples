@@ -405,6 +405,12 @@ if __name__ == '__main__':
     print(generate_text(model, tokenizer, "日本で一番高い山は"))
 ```
 
+上記のコードは、以下の要領で実行可能です
+
+```bash
+$ qsub -g $GROUP scripts/generate_text_lora.sh
+```
+
 ## 分散処理
 
 複数のGPUを活用するには、分散処理についての知識が必要です.
